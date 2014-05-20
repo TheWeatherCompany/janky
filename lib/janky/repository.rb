@@ -24,7 +24,7 @@ module Janky
       repo = GitHub.repo_get(nwo)
       return if !repo
 
-      uri    = repo["private"] ? repo["ssh_url"] : repo["git_url"]
+      uri    = repo["ssh_url"]
       name ||= repo["name"]
       uri.gsub!(/\.git$/, "")
 
