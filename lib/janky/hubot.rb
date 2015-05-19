@@ -35,7 +35,7 @@ module Janky
     post %r{\/([-_\.0-9a-zA-Z]+)\/([-_\.a-zA-z0-9\/]+)} do |repo_name, branch_name|
       repo    = find_repo(repo_name)
       branch  = repo.branch_for(branch_name)
-      room_id = (params["room_id"] && Integer(params["room_id"]) rescue nil)
+      room_id = (params["room_id"] rescue nil)
       user    = params["user"]
       build   = branch.head_build_for(room_id, user)
       build ||= repo.build_sha(branch_name, user, room_id)
@@ -63,6 +63,20 @@ module Janky
         [200, "Room for #{repo.name} updated to #{room}"]
       else
         [403, "Unknown room: #{room.inspect}"]
+      end
+    end
+
+    # Update a repository's context
+    put %r{\/([-_\.0-9a-zA-Z]+)\/context} do |repo_name|
+      context = params["context"]
+      repo = find_repo(repo_name)
+
+      if repo
+        repo.context = context
+        repo.save
+        [200, "Context #{context} set for #{repo_name}"]
+      else
+        [404, "Unknown Repository #{repo_name}"]
       end
     end
 
@@ -112,7 +126,8 @@ module Janky
         :repo => repo.uri,
         :room_id => repo.room_id,
         :enabled => repo.enabled,
-        :hook_url => repo.hook_url
+        :hook_url => repo.hook_url,
+        :context => repo.context
       }
       res.to_json
     end
@@ -121,6 +136,19 @@ module Janky
       repo   = find_repo(repo_name)
       repo.destroy
       "Janky project #{repo_name} deleted"
+    end
+
+    # Delete a repository's context
+    delete %r{\/([-_\.0-9a-zA-Z]+)\/context} do |repo_name|
+      repo = find_repo(repo_name)
+
+      if repo
+        repo.context = nil
+        repo.save
+        [200, "Context removed for #{repo_name}"]
+      else
+        [404, "Unknown Repository #{repo_name}"]
+      end
     end
 
     # Get the status of a repository's branch.
@@ -147,6 +175,8 @@ ci setup github/janky name template
 ci toggle janky
 ci rooms
 ci set room janky development
+ci set context janky ci/janky
+ci unset context janky
 ci status
 ci status janky
 ci status janky/master

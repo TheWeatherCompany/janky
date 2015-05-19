@@ -48,7 +48,7 @@ Of a specific branch:
 
     hubot ci build janky/libgit2
 
-Different builds aren't relevant to the same Campfire room and so Janky
+Different builds aren't relevant to the same chat room and so Janky
 lets you choose where notifications are sent to. First get a list of
 available rooms:
 
@@ -79,7 +79,7 @@ Installing
 
 ### Jenkins
 
-Janky requires access to a Jenkins server. Version **1.427** is
+Janky requires access to a Jenkins server. Version **1.580** is
 recommended. Refer to the Jenkins [documentation][doc] for installation
 instructions and install the [Notification Plugin][np] version 1.4.
 
@@ -180,7 +180,9 @@ via the GitHub API:
       -d '{ "scopes": [ "repo:status" ], "note": "janky" }' \
       https://api.github.com/authorizations
 
-then set `JANKY_GITHUB_STATUS_TOKEN`.
+then set `JANKY_GITHUB_STATUS_TOKEN`.  Optionally, you can also set
+`JANKY_GITHUB_STATUS_CONTEXT` to send a context to the GitHub API by
+default
 
 `username` and `password` in the above example should be the same as the
 values provided for `JANKY_GITHUB_USER` and `JANKY_GITHUB_PASSWORD`
@@ -218,6 +220,42 @@ Installation:
 * `echo 'gem "hipchat", "~>0.4"' >> Gemfile`
 * `bundle`
 * `git commit -am "install hipchat"`
+
+#### Slack
+
+Required settings:
+
+* `JANKY_CHAT=slack`
+* `JANKY_CHAT_SLACK_TEAM`: slack team name
+* `JANKY_CHAT_SLACK_TOKEN`: authentication token for the user sending build notifications.
+* `JANKY_CHAT_SLACK_USERNAME`: name that messages will appear be sent from.
+  Defaults to `CI`.
+* `JANKY_CHAT_SLACK_ICON_URL`: URL to an image to use as the icon for this message.
+
+Installation:
+
+* Add `require "janky/chat_service/slack"` to the `config/environment.rb`
+  file **before** the `Janky.setup(ENV)` line.
+* `echo 'gem "slack.rb"' >> Gemfile`
+* `bundle`
+* `git commit -am "install slack"`
+
+#### Hubot
+
+Sends notifications to Hubot via [janky script](http://git.io/hubot-janky).
+
+Required settings:
+
+* `JANKY_CHAT=hubot`
+* `JANKY_CHAT_HUBOT_URL`: URL to your Hubot instance.
+* `JANKY_CHAT_HUBOT_ROOMS`: List of rooms which can be set via `ci set room`.
+  * For IRC: Comma-separated list of channels `"#room, #another-room"`
+  * For Campfire/HipChat: List with room id and name `"34343:room, 23223:another-room"`
+  * For Slack: List with room names `"room, another-room"`
+
+Installation:
+* Add `require "janky/chat_service/hubot"` to the `config/environment.rb`
+  file **before** the `Janky.setup(ENV)` line.
 
 ### Authentication
 
@@ -300,8 +338,13 @@ send a Pull Request.  Note that any changes to behavior without tests will
 be rejected.  If you are adding significant new features, please add both
 tests and documentation.
 
+Maintainers
+-----------
+
+* [@mattr-](https://github.com/mattr-)
+
 Copying
 -------
 
-Copyright © 2011-2013, GitHub, Inc. See the `COPYING` file for license
+Copyright © 2011-2014, GitHub, Inc. See the `COPYING` file for license
 rights and limitations (MIT).

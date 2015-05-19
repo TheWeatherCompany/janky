@@ -2,7 +2,7 @@ $LOAD_PATH.unshift(File.expand_path("../../lib", __FILE__))
 
 require "janky"
 require "test/unit"
-require "mocha"
+require "mocha/setup"
 require "database_cleaner"
 
 class Test::Unit::TestCase
@@ -67,7 +67,7 @@ class Test::Unit::TestCase
 
     repo    = Janky::Repository.find_by_name!(repo_name)
     payload = gh_payload(repo, branch, pusher, [gh_commit(commit)])
-    digest  = OpenSSL::Digest::Digest.new("sha1")
+    digest  = OpenSSL::Digest::SHA1.new
     sig     = OpenSSL::HMAC.hexdigest(digest, Janky::GitHub.secret,
                 payload.to_json)
 
